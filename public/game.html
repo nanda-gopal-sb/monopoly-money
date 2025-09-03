@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head></head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://unpkg.com/pocketbase/dist/pocketbase.umd.js"></script>
+    <title>Monopoly Banking</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap');
+        :root {
+            --primary-color: #0077b6;
+            --secondary-color: #caf0f8;
+            --background-color: #f1faee;
+            --text-color: #1d3557;
+            --accent-color: #e63946;
+            --success-color: #4CAF50;
+            --border-radius: 12px;
+            --box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+        .container {
+            width: 100%;
+            max-width: 450px;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            overflow: hidden;
+        }
+        .header {
+            background: var(--primary-color);
+            color: white;
+            padding: 25px 20px;
+            text-align: center;
+        }
+        .header h1 { margin: 0; font-size: 1.2em; font-weight: 600; }
+        .balance { font-size: 2.8em; font-weight: 700; margin: 10px 0 0; letter-spacing: 1px; }
+        #game-code-display { font-weight: 400; font-size: 0.8em; opacity: 0.8; margin-top: 10px; }
+        .player-list { padding: 10px 20px 10px; }
+        .player-list h2, .history h2 {
+            font-size: 1.05em;
+            margin: 0 0 12px;
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 8px;
+        }
+        .player-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 10px; border-radius: 8px; transition: background-color 0.2s ease; font-size: 0.9em; }
+        .player-item:nth-child(even) { background-color: #f8f9fa; }
+        .player-info { display: flex; flex-direction: column; }
+        .player-name { font-weight: 600; }
+        .pay-btn {
+            background-color: var(--primary-color);
+            color: white; border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.75em;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+        .pay-btn:hover { background-color: #023e8a; }
+        .pay-btn:active { transform: scale(0.95); }
+        /* History */
+        .history { padding: 0 20px 20px; }
+        #history-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            max-height: 180px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            scrollbar-width: thin;
+        }
+        #history-list li {
+            background: #f8f9fa;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.8em;
+            display: flex;
+            justify-content: space-between;
+        }
+        #history-list li span.amount { font-weight: 700; color: var(--primary-color); }
+        #history-list li.empty { background: transparent; text-align: center; color: #6c757d; justify-content: center; }
+        /* Modal */
+        .modal-overlay {
+            position: fixed; top:0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.6);
+            display:flex; justify-content:center; align-items:center;
+            opacity:0; visibility:hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            padding: 20px;
+        }
+        .modal-overlay.visible { opacity:1; visibility:visible; }
+        .modal-content {
+            background:white;
+            padding: 24px 22px 26px;
+            border-radius: var(--border-radius);
+            width:100%; max-width:350px;
+            text-align:center;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+        .modal-overlay.visible .modal-content { transform: scale(1); }
+        .modal-content h3 { margin: 0; font-size: 1em; }
+        #payment-amount {
+            width:100%; padding:12px;
+            margin:18px 0;
+            border:2px solid #ddd; border-radius:8px;
+            font-size:1.3em; text-align:center; box-sizing:border-box;
+        }
+        .modal-actions { display:flex; justify-content:space-between; gap:10px; }
+        .modal-btn { flex:1; padding:12px; border-radius:8px; border:none; font-weight:600; cursor:pointer; font-size:0.85em; }
+        #confirm-payment-btn { background-color: var(--success-color); color:white; }
+        #cancel-payment-btn { background-color:#ccc; }
+        /* Feedback Banner */
+        #feedback-banner {
+            position:fixed; top:-100px; left:50%; transform:translateX(-50%);
+            background-color: var(--success-color); color:white;
+            padding:12px 22px; border-radius:25px;
+            box-shadow:0 4px 10px rgba(0,0,0,0.2);
+            font-weight:600; font-size:0.85em;
+            transition: top 0.4s ease-in-out;
+            z-index:1000;
+        }
+        #feedback-banner.show { top: 18px; }
+        @media (max-width:480px) {
+            .balance { font-size: 2.2em; }
+            .pay-btn { padding:6px 14px; }
+            #history-list { max-height: 150px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="banking-ui">
+            <div class="header">
+                <h1 id="player-name-display">Loading...</h1>
+                <p id="my-balance" class="balance">₹0</p>
+            </div>
+            <div class="player-list" id="player-list-container">
+                <h2>Players</h2>
+            </div>
+            <div class="history">
+                <h2>History</h2>
+                <ul id="history-list">
+                    <li class="empty">No transactions yet</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div id="payment-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 id="payment-modal-title">Pay Player</h3>
+            <input type="number" id="payment-amount" placeholder="0" min="1">
+            <div class="modal-actions">
+                <button id="cancel-payment-btn" class="modal-btn">Cancel</button>
+                <button id="confirm-payment-btn" class="modal-btn">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="feedback-banner">Transaction Successful!</div>
+
+    <script>
+        const playerNameDisplay = document.getElementById('player-name-display');
+        const myBalanceDisplay = document.getElementById('my-balance');
+        const playerListContainer = document.getElementById('player-list-container');
+        const paymentModal = document.getElementById('payment-modal');
+        const paymentModalTitle = document.getElementById('payment-modal-title');
+        const paymentAmountInput = document.getElementById('payment-amount');
+        const confirmPaymentBtn = document.getElementById('confirm-payment-btn');
+        const cancelPaymentBtn = document.getElementById('cancel-payment-btn');
+        const feedbackBanner = document.getElementById('feedback-banner');
+        const historyList = document.getElementById('history-list');
+
+        let currentPlayer = { name: '', balance: 0 };
+        let allPlayers = [];
+        let paymentTarget = null;
+
+        function renderPlayerList() {
+            playerListContainer.innerHTML = '<h2>Players</h2>';
+            allPlayers.forEach(player => {
+                if (player !== currentPlayer.name) {
+                    const playerItem = document.createElement('div');
+                    playerItem.className = 'player-item';
+                    playerItem.innerHTML = `
+                        <div class="player-info">
+                            <span class="player-name">${player}</span>
+                        </div>
+                        <button class="pay-btn" data-player-name="${player}">Pay</button>`;
+                    playerListContainer.appendChild(playerItem);
+                }
+            });
+        }
+
+        // History handling
+        function historyKey() {
+            return `transactions_${currentPlayer.name}`;
+        }
+
+        function loadHistory() {
+            const data = JSON.parse(localStorage.getItem(historyKey()) || '[]');
+            renderHistory(data);
+        }
+
+        function saveTransaction(target, amount) {
+            const data = JSON.parse(localStorage.getItem(historyKey()) || '[]');
+            const entry = `${target} -> ${amount}`;
+            data.unshift(entry);
+            // Keep only latest 100
+            localStorage.setItem(historyKey(), JSON.stringify(data.slice(0, 100)));
+            renderHistory(data);
+        }
+
+        function renderHistory(list) {
+            historyList.innerHTML = '';
+            if (!list.length) {
+                historyList.innerHTML = '<li class="empty">No transactions yet</li>';
+                return;
+            }
+            list.forEach(item => {
+                const [target, amtPart] = item.split('->').map(s => s.trim());
+                const li = document.createElement('li');
+                li.innerHTML = `<span>${target}</span><span class="amount">₹${amtPart}</span>`;
+                historyList.appendChild(li);
+            });
+        }
+
+        function showFeedback(message) {
+            feedbackBanner.textContent = message;
+            feedbackBanner.classList.add('show');
+            setTimeout(() => feedbackBanner.classList.remove('show'), 2500);
+        }
+
+        async function fetchPlayers() {
+            try {
+                const response = await fetch('/get-players');
+                if (!response.ok) throw new Error();
+                const data = await response.json();
+                allPlayers = data.players;
+                renderPlayerList();
+            } catch {
+                playerListContainer.innerHTML = '<h2>Players</h2><p style="font-size:0.8em;color:#666;">Could not load players.</p>';
+            }
+        }
+
+        async function fetchBalance() {
+            try {
+                const response = await fetch('/get-balance', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: currentPlayer.name })
+                });
+                if (!response.ok) throw new Error();
+                const data = await response.json();
+                currentPlayer.balance = data.balance;
+                myBalanceDisplay.textContent = `₹${currentPlayer.balance}`;
+            } catch {
+                myBalanceDisplay.textContent = 'Error';
+            }
+        }
+
+        function handleOpenPaymentModal(e) {
+            if (e.target.classList.contains('pay-btn')) {
+                paymentTarget = e.target.dataset.playerName;
+                paymentModalTitle.textContent = `Pay ${paymentTarget}`;
+                paymentAmountInput.value = '';
+                paymentModal.classList.add('visible');
+                paymentAmountInput.focus();
+            }
+        }
+
+        function handleClosePaymentModal() {
+            paymentModal.classList.remove('visible');
+            paymentTarget = null;
+        }
+
+        async function handleConfirmPayment() {
+            await fetchBalance();
+            const amount = parseInt(paymentAmountInput.value, 10);
+            if (isNaN(amount) || amount <= 0) {
+                alert('Enter valid amount.');
+                return;
+            }
+            if (amount > currentPlayer.balance) {
+                alert('Insufficient funds.');
+                return;
+            }
+            try {
+                const response = await fetch('/submit-transaction', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        source: currentPlayer.name,
+                        target: paymentTarget,
+                        amount: amount
+                    })
+                });
+                if (!response.ok) throw new Error();
+                // Save to local storage
+                saveTransaction(paymentTarget, amount);
+                showFeedback('Transaction Successful!');
+                handleClosePaymentModal();
+                await fetchBalance();
+                await fetchPlayers();
+            } catch {
+                alert('Transaction failed.');
+            }
+        }
+
+        function initializeApp() {
+            const pathParts = window.location.pathname.split('/').filter(p => p);
+            const playerName = pathParts.length > 0 ? pathParts[pathParts.length - 2] : null;
+            if (!playerName) {
+                document.body.innerHTML = `
+                    <div style="text-align:center; padding:20px;">
+                        <h1>Error</h1>
+                        <p>Could not determine player name from the URL.</p>
+                        <p>Use: /your_name/game</p>
+                    </div>`;
+                return;
+            }
+            currentPlayer.name = playerName;
+            playerNameDisplay.textContent = playerName;
+            loadHistory();
+            fetchBalance();
+            fetchPlayers();
+        }
+
+        playerListContainer.addEventListener('click', handleOpenPaymentModal);
+        cancelPaymentBtn.addEventListener('click', handleClosePaymentModal);
+        confirmPaymentBtn.addEventListener('click', handleConfirmPayment);
+        paymentModal.addEventListener('click', e => { if (e.target === paymentModal) handleClosePaymentModal(); });
+        document.addEventListener('DOMContentLoaded', initializeApp);
+        setInterval(fetchBalance, 3000);
+    </script>
+</body>
+</html>

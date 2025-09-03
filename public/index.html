@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Player</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+        }
+        .container {
+            text-align: center;
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        input[type="text"] {
+            padding: 10px;
+            width: 80%;
+            border: 2px solid #ff6f61;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #ff6f61;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #e55b50;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Add a Player</h1>
+        <input type="text" id="playerName" placeholder="Enter player name" />
+        <br>
+        <button onclick="addPlayer()">Submit</button>
+    </div>
+
+    <script>
+        function addPlayer() {
+            const playerName = document.getElementById('playerName').value;
+            if (!playerName) {
+                alert('Please enter a name!');
+                return;
+            }
+
+            fetch('add-player', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ name: playerName })
+            })
+            .then(response => {
+                if (response.ok) {
+                    window.location.href = `${playerName}/game`;
+                } else {
+                    alert('Failed to add player.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred.');
+            });
+        }
+    </script>
+</body>
+</html>
