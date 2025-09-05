@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monopoly Property Cards (Print Optimized)</title>
+    <style>
+        /* Styles for screen viewing */
+        body {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 20px;
+            padding: 20px;
+            background-color: #f0f2f5;
+            margin: 0;
+        }
+
+        /* General card container styles (for screen) */
+        .monopoly-card {
+            width: 250px;
+            height: 380px;
+            border: 4px solid black;
+            border-radius: 12px;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+            box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.3);
+            background-color: white;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+        }
+
+        /* Color-specific classes */
+        .brown-bg { background-color: #964B00; }
+        .light_blue-bg { background-color: #87CEEB; }
+        .pink-bg { background-color: #FF69B4; }
+        .orange-bg { background-color: #FFA500; }
+        .red-bg { background-color: #FF0000; }
+        .yellow-bg { background-color: #FFFF00; }
+        .green-bg { background-color: #008000; }
+        .dark_blue-bg { background-color: #262686; }
+        .station-bg, .utility-bg { background-color: #D3D3D3; }
+
+        /* Shared styling for both screen and print */
+        .card-header {
+            height: 25%;
+            border-bottom: 2px solid black;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+            text-align: center;
+            text-transform: uppercase;
+        }
+        .title-deed-text {
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .property-name {
+            font-size: 24px;
+            font-weight: 900;
+            margin-top: 5px;
+            line-height: 1.1;
+        }
+        .card-body {
+            flex-grow: 1;
+            padding: 15px;
+            font-size: 14px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+        }
+        .rent-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        .house-icon {
+            font-size: 20px;
+            line-height: 1;
+            color: green;
+        }
+        .hotel-icon {
+            font-size: 20px;
+            line-height: 1;
+            color: red;
+        }
+        .rent-value {
+            font-weight: bold;
+        }
+        .card-footer {
+            border-top: 2px solid black;
+            padding: 15px;
+            font-size: 14px;
+        }
+        .cost-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+        .small-text {
+            font-size: 11px;
+            font-style: italic;
+            text-align: right;
+            margin-top: 5px;
+        }
+
+        /* * Styles optimized for printing on A4 sheets. 
+         * These styles will override the screen styles when the document is printed.
+         */
+        @media print {
+            /* Define the page size and margins */
+            @page {
+                size: A4;
+                margin: 1cm;
+            }
+
+            /* Remove flexbox and background for a clean, stacked layout */
+            body {
+                display: block;
+                background-color: white;
+            }
+            
+            /* Adjust card size for A4 sheet, allowing 4 cards per page */
+            .monopoly-card {
+                width: 8.27cm; 
+                height: 11.69cm;
+                margin: 0.5cm;
+                border-radius: 0;
+                box-shadow: none;
+                display: inline-block; /* Aligns cards side-by-side then wraps */
+                vertical-align: top;
+                /* Force a page break after the 4th card to start a new page */
+                page-break-after: always;
+            }
+
+            /* Prevent the page-break on every card and reset it every 4 cards */
+            .monopoly-card:nth-of-type(4n+4) {
+                page-break-after: always;
+            }
+            .monopoly-card:nth-of-type(4n+1) {
+                page-break-before: always;
+            }
+
+            /* Print-specific header styling to save ink */
+            .card-header {
+                border-bottom: 1px solid black;
+            }
+            .monopoly-card .card-body, .monopoly-card .card-footer {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<script>
+    const monopolyData = {
+        "properties": [
+            {
+                "name": "Karamana", "color_group": "brown", "price": 60, "mortgage_value": 30, "house_cost": 50, "rent": 2, "rent_1_house": 10, "rent_2_houses": 30, "rent_3_houses": 90, "rent_4_houses": 160, "rent_hotel": 250
+            },
+            {
+                "name": "Killipalam", "color_group": "brown", "price": 60, "mortgage_value": 30, "house_cost": 50, "rent": 4, "rent_1_house": 20, "rent_2_houses": 60, "rent_3_houses": 180, "rent_4_houses": 320, "rent_hotel": 450
+            },
+            {
+                "name": "Pettah", "color_group": "light_blue", "price": 100, "mortgage_value": 50, "house_cost": 50, "rent": 6, "rent_1_house": 30, "rent_2_houses": 90, "rent_3_houses": 270, "rent_4_houses": 400, "rent_hotel": 550
+            },
+            {
+                "name": "Vanchiyoor", "color_group": "light_blue", "price": 100, "mortgage_value": 50, "house_cost": 50, "rent": 6, "rent_1_house": 30, "rent_2_houses": 90, "rent_3_houses": 270, "rent_4_houses": 400, "rent_hotel": 550
+            },
+            {
+                "name": "Pattoor", "color_group": "light_blue", "price": 120, "mortgage_value": 60, "house_cost": 50, "rent": 8, "rent_1_house": 40, "rent_2_houses": 100, "rent_3_houses": 300, "rent_4_houses": 450, "rent_hotel": 600
+            },
+            {
+                "name": "Jagathy", "color_group": "pink", "price": 140, "mortgage_value": 70, "house_cost": 100, "rent": 10, "rent_1_house": 50, "rent_2_houses": 150, "rent_3_houses": 450, "rent_4_houses": 625, "rent_hotel": 750
+            },
+            {
+                "name": "Kowdiar", "color_group": "pink", "price": 140, "mortgage_value": 70, "house_cost": 100, "rent": 10, "rent_1_house": 50, "rent_2_houses": 150, "rent_3_houses": 450, "rent_4_houses": 625, "rent_hotel": 750
+            },
+            {
+                "name": "Attingal", "color_group": "pink", "price": 160, "mortgage_value": 80, "house_cost": 100, "rent": 12, "rent_1_house": 60, "rent_2_houses": 180, "rent_3_houses": 500, "rent_4_houses": 700, "rent_hotel": 900
+            },
+            {
+                "name": "Palayam", "color_group": "orange", "price": 180, "mortgage_value": 90, "house_cost": 100, "rent": 14, "rent_1_house": 70, "rent_2_houses": 200, "rent_3_houses": 550, "rent_4_houses": 750, "rent_hotel": 950
+            },
+            {
+                "name": "Statue Junction", "color_group": "orange", "price": 180, "mortgage_value": 90, "house_cost": 100, "rent": 14, "rent_1_house": 70, "rent_2_houses": 200, "rent_3_houses": 550, "rent_4_houses": 750, "rent_hotel": 950
+            },
+            {
+                "name": "East Fort", "color_group": "orange", "price": 200, "mortgage_value": 100, "house_cost": 100, "rent": 16, "rent_1_house": 80, "rent_2_houses": 220, "rent_3_houses": 600, "rent_4_houses": 800, "rent_hotel": 1000
+            },
+            {
+                "name": "Pattom", "color_group": "red", "price": 220, "mortgage_value": 110, "house_cost": 150, "rent": 18, "rent_1_house": 90, "rent_2_houses": 250, "rent_3_houses": 700, "rent_4_houses": 875, "rent_hotel": 1050
+            },
+            {
+                "name": "Thampanoor", "color_group": "red", "price": 220, "mortgage_value": 110, "house_cost": 150, "rent": 18, "rent_1_house": 90, "rent_2_houses": 250, "rent_3_houses": 700, "rent_4_houses": 875, "rent_hotel": 1050
+            },
+            {
+                "name": "Kallambalam", "color_group": "red", "price": 240, "mortgage_value": 120, "house_cost": 150, "rent": 20, "rent_1_house": 100, "rent_2_houses": 300, "rent_3_houses": 750, "rent_4_houses": 925, "rent_hotel": 1100
+            },
+            {
+                "name": "Kovalam", "color_group": "yellow", "price": 260, "mortgage_value": 130, "house_cost": 150, "rent": 22, "rent_1_house": 110, "rent_2_houses": 330, "rent_3_houses": 800, "rent_4_houses": 975, "rent_hotel": 1150
+            },
+            {
+                "name": "Lulu Mall", "color_group": "yellow", "price": 260, "mortgage_value": 130, "house_cost": 150, "rent": 22, "rent_1_house": 110, "rent_2_houses": 330, "rent_3_houses": 800, "rent_4_houses": 975, "rent_hotel": 1150
+            },
+            {
+                "name": "Technopark", "color_group": "yellow", "price": 280, "mortgage_value": 140, "house_cost": 150, "rent": 24, "rent_1_house": 120, "rent_2_houses": 360, "rent_3_houses": 850, "rent_4_houses": 1025, "rent_hotel": 1200
+            },
+            {
+                "name": "Ulloor", "color_group": "green", "price": 300, "mortgage_value": 150, "house_cost": 200, "rent": 26, "rent_1_house": 130, "rent_2_houses": 390, "rent_3_houses": 900, "rent_4_houses": 1100, "rent_hotel": 1275
+            },
+            {
+                "name": "Nalanchara", "color_group": "green", "price": 300, "mortgage_value": 150, "house_cost": 200, "rent": 26, "rent_1_house": 130, "rent_2_houses": 390, "rent_3_houses": 900, "rent_4_houses": 1100, "rent_hotel": 1275
+            },
+            {
+                "name": "Kumarapuram", "color_group": "green", "price": 320, "mortgage_value": 160, "house_cost": 200, "rent": 28, "rent_1_house": 150, "rent_2_houses": 450, "rent_3_houses": 1000, "rent_4_houses": 1200, "rent_hotel": 1400
+            },
+            {
+                "name": "VSSC", "color_group": "dark_blue", "price": 350, "mortgage_value": 175, "house_cost": 200, "rent": 35, "rent_1_house": 175, "rent_2_houses": 500, "rent_3_houses": 1100, "rent_4_houses": 1300, "rent_hotel": 1500
+            },
+            {
+                "name": "ISSER", "color_group": "dark_blue", "price": 400, "mortgage_value": 200, "house_cost": 200, "rent": 50, "rent_1_house": 200, "rent_2_houses": 600, "rent_3_houses": 1400, "rent_4_houses": 1700, "rent_hotel": 2000
+            },
+            {
+                "name": "Kochuveli Station", "color_group": "station", "price": 200, "mortgage_value": 100, "rent": 25, "rent_2_stations": 50, "rent_3_stations": 100, "rent_4_stations": 200
+            },
+            {
+                "name": "Trivandrum Central", "color_group": "station", "price": 200, "mortgage_value": 100, "rent": 25, "rent_2_stations": 50, "rent_3_stations": 100, "rent_4_stations": 200
+            },
+            {
+                "name": "Parassala Station", "color_group": "station", "price": 200, "mortgage_value": 100, "rent": 25, "rent_2_stations": 50, "rent_3_stations": 100, "rent_4_stations": 200
+            },
+            {
+                "name": "Varkala Station", "color_group": "station", "price": 200, "mortgage_value": 100, "rent": 25, "rent_2_stations": 50, "rent_3_stations": 100, "rent_4_stations": 200
+            },
+            {
+                "name": "KSEB", "color_group": "utility", "price": 150, "mortgage_value": 75, "rent_1_utility": "4 times dice roll", "rent_2_utilities": "10 times dice roll"
+            },
+            {
+                "name": "KWA", "color_group": "utility", "price": 150, "mortgage_value": 75, "rent_1_utility": "4 times dice roll", "rent_2_utilities": "10 times dice roll"
+            }
+        ]
+    };
+
+    function renderMonopolyCards() {
+        const body = document.body;
+        monopolyData.properties.forEach(property => {
+            const card = document.createElement('div');
+            card.className = 'monopoly-card';
+
+            const header = document.createElement('div');
+            header.className = `card-header ${property.color_group}-bg`;
+            header.innerHTML = `
+                <div class="title-deed-text">Title Deed</div>
+                <div class="property-name">${property.name}</div>
+            `;
+            card.appendChild(header);
+
+            const bodyContent = document.createElement('div');
+            bodyContent.className = 'card-body';
+            
+            if (property.color_group === 'station') {
+                bodyContent.innerHTML = `
+                    <div class="rent-row"><span>Rent</span><span class="rent-value">M${property.rent}</span></div>
+                    <div class="rent-row"><span>Rent with 2 stations</span><span class="rent-value">M${property.rent_2_stations}</span></div>
+                    <div class="rent-row"><span>Rent with 3 stations</span><span class="rent-value">M${property.rent_3_stations}</span></div>
+                    <div class="rent-row"><span>Rent with 4 stations</span><span class="rent-value">M${property.rent_4_stations}</span></div>
+                    <br>
+                    <div class="rent-row"><span>Mortgage Value</span><span class="rent-value">M${property.mortgage_value}</span></div>
+                `;
+            } else if (property.color_group === 'utility') {
+                bodyContent.innerHTML = `
+                    <div class="rent-row"><span>Rent with 1 utility</span><span class="rent-value">${property.rent_1_utility}</span></div>
+                    <div class="rent-row"><span>Rent with 2 utilities</span><span class="rent-value">${property.rent_2_utilities}</span></div>
+                    <br>
+                    <div class="rent-row"><span>Mortgage Value</span><span class="rent-value">M${property.mortgage_value}</span></div>
+                `;
+            } else {
+                bodyContent.innerHTML = `
+                    <div class="rent-row"><span>Rent</span><span class="rent-value">M${property.rent}</span></div>
+                    <div class="rent-row"><span>Rent with colour set</span><span class="rent-value">M${property.rent * 2}</span></div>
+                    <div class="rent-row"><span>Rent with <span class="house-icon">1</span></span><span class="rent-value">M${property.rent_1_house}</span></div>
+                    <div class="rent-row"><span>Rent with <span class="house-icon">2</span></span><span class="rent-value">M${property.rent_2_houses}</span></div>
+                    <div class="rent-row"><span>Rent with <span class="house-icon">3</span></span><span class="rent-value">M${property.rent_3_houses}</span></div>
+                    <div class="rent-row"><span>Rent with <span class="house-icon">4</span></span><span class="rent-value">M${property.rent_4_houses}</span></div>
+                    <div class="rent-row"><span>Rent with <span class="hotel-icon">🏨</span></span><span class="rent-value">M${property.rent_hotel}</span></div>
+                `;
+            }
+            card.appendChild(bodyContent);
+
+            if (property.color_group !== 'station' && property.color_group !== 'utility') {
+                const footer = document.createElement('div');
+                footer.className = 'card-footer';
+                footer.innerHTML = `
+                    <div class="cost-row"><span>Houses cost</span><span class="rent-value">M${property.house_cost} each</span></div>
+                    <div class="cost-row"><span>Hotels cost</span><span class="rent-value">M${property.house_cost} each</span></div>
+                    <div class="small-text">(plus 4 houses)</div>
+                `;
+                card.appendChild(footer);
+            }
+
+            body.appendChild(card);
+        });
+    }
+
+    window.onload = renderMonopolyCards;
+</script>
+
+</body>
+</html>

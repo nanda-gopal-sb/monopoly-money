@@ -49,7 +49,7 @@ app.post('/add-player', async (req, res) => {
     try {
         const data = {
             "name": name,
-            "money": 2500,
+            "money": 1000,
         };
         const player_record = await pb.collection('players').create(data);
     } catch (error) {
